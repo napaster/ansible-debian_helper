@@ -1,0 +1,14 @@
+---
+# Базовые утилиты которые ставим на любой свежий Debian/Ubuntu сервер.
+debian_helper_packages:
+  - grc
+  - sudo
+  - tmux
+  - tcpdump
+  - mc
+  - bash-completion
+
+# Включить цветные shell-aliases от grc (df / ip / ss / journalctl / etc).
+# Триггерит `GRC_ALIASES=true` в /etc/default/grc, после чего пакетный
+# /etc/profile.d/grc.sh на login сам подтянет alias'ы.
+debian_helper_grc_aliases: true

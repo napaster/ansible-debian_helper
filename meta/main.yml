@@ -1,0 +1,22 @@
+---
+galaxy_info:
+  author: napaster
+  description: Debian/Ubuntu baseline helper — base packages + grc shell colours
+  license: MIT
+  min_ansible_version: '2.18'
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+        - trixie
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+  galaxy_tags:
+    - debian
+    - ubuntu
+    - baseline
+    - grc
+
+dependencies: []

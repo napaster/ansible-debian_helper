@@ -1,0 +1,17 @@
+---
+- name: "debian_helper | apt | install base packages"
+  ansible.builtin.apt:
+    name: "{{ debian_helper_packages }}"
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: "debian_helper | grc | toggle GRC_ALIASES в /etc/default/grc"
+  ansible.builtin.lineinfile:
+    path: /etc/default/grc
+    regexp: '^#?\s*GRC_ALIASES='
+    line: "GRC_ALIASES={{ 'true' if debian_helper_grc_aliases else 'false' }}"
+    state: present
+    create: false
+  when:
+    - "'grc' in debian_helper_packages"
