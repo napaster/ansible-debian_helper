@@ -1,10 +1,45 @@
 ---
+- name: "debian_helper | apt | wait for cloud-init/unattended-upgrades dpkg lock"
+  ansible.builtin.shell:
+    cmd: |
+      set -e
+      for i in $(seq 1 60); do
+        if ! fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 \
+           && ! fuser /var/lib/dpkg/lock >/dev/null 2>&1 \
+           && ! fuser /var/lib/apt/lists/lock >/dev/null 2>&1; then
+          exit 0
+        fi
+        sleep 5
+      done
+      echo "dpkg lock still held after 5 minutes" >&2
+      exit 1
+  changed_when: false
+
 - name: "debian_helper | apt | install base packages"
   ansible.builtin.apt:
     name: "{{ debian_helper_packages }}"
     state: present
     update_cache: true
     cache_valid_time: 3600
+    lock_timeout: 300
+  register: debian_helper_apt_result
+  retries: 3
+  delay: 30
+  until: debian_helper_apt_result is success
+
+- name: "debian_helper | verify | refresh package facts"
+  ansible.builtin.package_facts:
+    manager: apt
+
+- name: "debian_helper | verify | каждый пакет реально установлен"
+  ansible.builtin.assert:
+    that: "item in ansible_facts.packages"
+    fail_msg: >-
+      Package {{ item }} was NOT actually installed despite apt module
+      reporting changed=true. Likely apt-get install was interrupted
+      (dpkg lock contention with cloud-init/unattended-upgrades, OOM,
+      network timeout). Investigate /var/log/apt/history.log and re-run.
+  loop: "{{ debian_helper_packages }}"
 
 - name: "debian_helper | grc | toggle GRC_ALIASES в /etc/default/grc"
   ansible.builtin.lineinfile:
@@ -12,6 +47,9 @@
     regexp: '^#?\s*GRC_ALIASES='
     line: "GRC_ALIASES={{ 'true' if debian_helper_grc_aliases else 'false' }}"
     state: present
-    create: false
+    create: true
+    owner: root
+    group: root
+    mode: '0644'
   when:
     - "'grc' in debian_helper_packages"
