@@ -7,6 +7,12 @@ debian_helper_packages:
   - tcpdump
   - mc
   - bash-completion
+  # locales — на свежих Ubuntu 24.04 минимальных образах пакет НЕ
+  # установлен, тогда /etc/locale.gen отсутствует и linux_helper'овская
+  # таска `Deploy locales` (community.general.locale_gen) падает с
+  # "Is the package 'locales' installed?". Включаем сюда чтобы linux_helper
+  # стабильно работал на свежей VM-ке.
+  - locales
 
 # Включить цветные shell-aliases от grc (df / ip / ss / journalctl / etc).
 # Триггерит `GRC_ALIASES=true` в /etc/default/grc, после чего пакетный
