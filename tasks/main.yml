@@ -15,3 +15,13 @@
     create: false
   when:
     - "'grc' in debian_helper_packages"
+
+- name: "debian_helper | motd | Hostname строка в MOTD (сразу после Welcome)"
+  ansible.builtin.copy:
+    dest: /etc/update-motd.d/05-hostname
+    owner: root
+    group: root
+    mode: '0755'
+    content: |
+      #!/bin/sh
+      printf "Hostname:       %s\n" "$(hostname -f)"
